@@ -1,14 +1,36 @@
 import { Router } from 'express'
 import * as userController from '../controllers/user.controller.js'
-
+import { verifyToken, hasRole } from '../middlewares/check-user.js'
 const router = Router()
 
-router.get('/', userController.getAllUser)
-router.get('/:id', userController.getUserById)
-router.put('/:id', userController.updateUserById)
-router.post('/roles/:id', userController.assignUserRoles)
-router.get('/roles/:id', userController.getUserRoles)
-router.post('/', userController.createUser)
-router.delete('/:id', userController.deleteUserById)
+router.post(
+  '/roles/:id',
+  [verifyToken, hasRole(['ADMIN'])],
+  userController.assignUserRoles
+)
+router.get(
+  '/roles/:id',
+  [verifyToken, hasRole(['ADMIN'])],
+  userController.getUserRoles
+)
+
+router.get(
+  '/',
+  [verifyToken, hasRole(['EDITOR', 'ADMIN'])],
+  userController.getAllUser
+)
+router.get('/:id', [verifyToken], userController.getUserById)
+router.put(
+  '/:id',
+  [verifyToken],
+  hasRole(['ADMIN']),
+  userController.updateUserById
+)
+router.post('/', [verifyToken, hasRole(['ADMIN'])], userController.createUser)
+router.delete(
+  '/:id',
+  [verifyToken, hasRole(['ADMIN'])],
+  userController.deleteUserById
+)
 
 export default router
