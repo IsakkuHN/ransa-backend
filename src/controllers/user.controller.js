@@ -1,5 +1,9 @@
 import User from '../models/user.model.js'
+import UserRole from '../models/role_user.model.js'
+import Role from '../models/role.model.js'
 import { userToDto } from '../lib/model-to-dto.js'
+import { where, Op } from 'sequelize'
+import sequelize from '../database.js'
 
 export async function createUser(req, res) {
   try {
@@ -96,5 +100,56 @@ export async function deleteUserById(req, res) {
     return res.sendStatus(204)
   } catch (error) {
     return res.status(500).json({ message: error })
+  }
+}
+
+export async function assignUserRoles(req, res) {
+  const { id } = req.params
+  const { roles } = req.body
+
+  try {
+    const [user, rolesToAssign] = await Promise.all([
+      User.findByPk(id),
+      Role.findAll({
+        where: {
+          id: {
+            [Op.in]: roles,
+          },
+        },
+      }),
+    ])
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    await sequelize.transaction(async (transaction) => {
+      await user.addRoles(rolesToAssign, {
+        through: { selfGranted: false },
+        transaction,
+      })
+    })
+
+    const userWithRoles = await User.findByPk(id, {
+      include: Role,
+    })
+
+    return res.json(userWithRoles)
+  } catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
+}
+
+export async function getUserRoles(req, res) {
+  try {
+    const { id } = req.params
+    const userWithRoles = await User.findByPk(id, {
+      include: Role,
+    })
+    if (!userWithRoles) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+    return res.json(userWithRoles.Roles)
+  } catch (error) {
+    return res.status(500).json({ message: error.message })
   }
 }
