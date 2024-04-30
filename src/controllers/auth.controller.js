@@ -1,5 +1,5 @@
-export const login = (req, res) => {}
+export const login = async (req, res) => {}
 
-export const signIn = (req, res) => {}
+export const signIn = async (req, res) => {}
 
-export const signOut = (req, res) => {}
+export const logout = async (req, res) => {}
