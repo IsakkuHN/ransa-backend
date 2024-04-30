@@ -1,7 +1,7 @@
 import { where } from 'sequelize'
 import User from '../models/user.model.js'
 import Role from '../models/role.model.js'
-import bcrypt from 'bcrypt'
+import bcryptjs from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 
@@ -22,7 +22,7 @@ export const login = async (req, res) => {
       return res.status(404).json({ message: 'User does not exists' })
     }
 
-    const matchPassword = bcrypt.compareSync(password, user.password)
+    const matchPassword = bcryptjs.compareSync(password, user.password)
     if (!matchPassword) {
       return res.status(401).json({ message: 'Password incorrect' })
     }

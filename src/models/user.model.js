@@ -1,6 +1,6 @@
 import { DataTypes } from 'sequelize'
 import sequelize from '../database.js'
-import bcrypt from 'bcrypt'
+import bcryptjs from 'bcryptjs'
 
 const User = sequelize.define('User', {
   id: {
@@ -37,7 +37,7 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
     set(value) {
-      const hashedPassword = bcrypt.hashSync(value, 10)
+      const hashedPassword = bcryptjs.hashSync(value, 10)
       this.setDataValue('password', hashedPassword)
     },
   },
